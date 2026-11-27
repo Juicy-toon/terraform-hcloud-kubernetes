@@ -932,6 +932,22 @@ variable "talos_upgrade_reboot_mode" {
   }
 }
 
+variable "talos_upgrade_drain_timeout" {
+  type        = string
+  default     = null
+  description = "Use talosctl's client-side drain (LifecycleService upgrade path) with this timeout, e.g. \"1h\", instead of the legacy path whose node-side drain gives up after a fixed 5 minutes and reboots anyway. Evictions honour PodDisruptionBudgets; on timeout the upgrade stops before the reboot, with the node cordoned and the new image staged. Not combinable with talos_upgrade_force or talos_upgrade_stage."
+
+  validation {
+    condition     = var.talos_upgrade_drain_timeout == null || can(regex("^[0-9]+(s|m|h)$", var.talos_upgrade_drain_timeout))
+    error_message = "The talos_upgrade_drain_timeout must be a duration like \"90m\" or \"1h\"."
+  }
+
+  validation {
+    condition     = var.talos_upgrade_drain_timeout == null || (!var.talos_upgrade_force && !var.talos_upgrade_stage)
+    error_message = "talos_upgrade_force and talos_upgrade_stage only exist on the legacy upgrade path; unset talos_upgrade_drain_timeout to use them."
+  }
+}
+
 variable "talos_reboot_debug" {
   type        = bool
   default     = false

@@ -44,7 +44,11 @@ talos_wait_for_health() {
 talos_upgrade() {
   talosctl upgrade \
     --talosconfig "$talosconfig" \
+%{ if talos_upgrade_drain_timeout == null ~}
     --legacy \
+%{ else ~}
+    --drain-timeout '${talos_upgrade_drain_timeout}' \
+%{ endif ~}
 %{ if talos_upgrade_debug ~}
     --debug \
 %{ endif ~}

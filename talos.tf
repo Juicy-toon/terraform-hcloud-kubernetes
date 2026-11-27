@@ -57,6 +57,7 @@ locals {
     talos_upgrade_insecure              = var.talos_upgrade_insecure
     talos_upgrade_stage                 = var.talos_upgrade_stage
     talos_upgrade_reboot_mode           = var.talos_upgrade_reboot_mode
+    talos_upgrade_drain_timeout         = var.talos_upgrade_drain_timeout
     talos_reboot_debug                  = var.talos_reboot_debug
     talos_reboot_mode                   = var.talos_reboot_mode
     talosctl_retries                    = var.talosctl_retries
