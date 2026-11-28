@@ -71,11 +71,15 @@ locals {
     kubernetes_proxy_image              = var.kubernetes_proxy_image
     kubernetes_kubelet_image            = var.kubernetes_kubelet_image
     control_plane_nodes                 = local.control_plane_private_ipv4_list
+    # Autoscaler nodes come and go during an apply (drains make it scale up), so the health check
+    # reads them from the Talos members when it runs instead of using this plan-time list.
     worker_nodes = concat(
       local.worker_private_ipv4_list,
       local.bare_metal_private_ipv4_list,
-      local.cluster_autoscaler_private_ipv4_list
     )
+    cluster_autoscaler_nodes_enabled    = var.cluster_autoscaler_discovery_enabled
+    cluster_autoscaler_hostname_pattern = local.cluster_autoscaler_hostname_pattern
+    ipv4_private_pattern                = local.ipv4_private_pattern
   })
 
   # Cluster Status

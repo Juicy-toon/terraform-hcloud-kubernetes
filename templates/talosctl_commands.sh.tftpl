@@ -25,12 +25,25 @@ talos_health_check() {
     return 0
   fi
 
+  workers='${join(",", worker_nodes)}'
+%{ if cluster_autoscaler_nodes_enabled ~}
+  autoscaler=$(
+    talosctl --talosconfig "$talosconfig" get member -n "${talos_primary_node}" -o json |
+      jq -r -s --arg host '${cluster_autoscaler_hostname_pattern}' --arg ip '${ipv4_private_pattern}' \
+        '[.[] | select(.spec.machineType == "worker" and (.spec.hostname | test($host)))
+          | [.spec.addresses[] | select(test($ip))][0] // empty] | join(",")'
+  ) || return 1
+  workers=$(printf '%s,%s' "$workers" "$autoscaler" | sed 's/^,//; s/,$//')
+%{ endif ~}
+
+  # A short wait per attempt: each retry reads the autoscaler nodes again.
   talosctl health \
     --talosconfig "$talosconfig" \
     --server=true \
     --control-plane-nodes '${join(",", control_plane_nodes)}' \
-    --worker-nodes '${join(",", worker_nodes)}' \
+    --worker-nodes "$workers" \
     --nodes "${talos_primary_node}" \
+    --wait-timeout 3m \
     "$@"
 }
 
