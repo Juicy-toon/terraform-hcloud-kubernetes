@@ -12,7 +12,7 @@ for host in "$@"; do
     printf '%s\n' "Rebooting node: $host"
 
     retry=1
-    until talos_reboot --nodes "$host"; do
+    until talos_reboot --nodes "$host" --endpoints "$host"; do
       talos_retry_or_exit retry
     done
 

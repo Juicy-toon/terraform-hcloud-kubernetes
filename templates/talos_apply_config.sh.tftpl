@@ -26,7 +26,7 @@ for host in "$@"; do
     fi
 
     retry=1
-    until talos_apply_config --nodes "$host" --file "$machine_config" --mode "$resolved_apply_mode"; do
+    until talos_apply_config --nodes "$host" --endpoints "$host" --file "$machine_config" --mode "$resolved_apply_mode"; do
       talos_retry_or_exit retry
     done
 
@@ -34,7 +34,7 @@ for host in "$@"; do
       printf '%s\n' "Rebooting node: $host"
 
       retry=1
-      until talos_reboot --nodes "$host"; do
+      until talos_reboot --nodes "$host" --endpoints "$host"; do
         talos_retry_or_exit retry
       done
 
