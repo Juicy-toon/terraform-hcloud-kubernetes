@@ -307,6 +307,16 @@ resource "terraform_data" "arm64_image" {
   ]
 }
 
+# Changes with the image selectors (Talos version, schematic). The lookups below depend on it, so a
+# new version defers them to apply time instead of failing at plan when the snapshot comes from
+# outside this module (talos_cloud_*_image_build_enabled = false) and is built in the same apply.
+resource "terraform_data" "image_selector" {
+  input = {
+    amd64 = local.talos_cloud_amd64_image_label_selector
+    arm64 = local.talos_cloud_arm64_image_label_selector
+  }
+}
+
 data "hcloud_image" "amd64" {
   count = local.cloud_amd64_image_required ? 1 : 0
 
@@ -314,7 +324,7 @@ data "hcloud_image" "amd64" {
   with_architecture = "x86"
   most_recent       = true
 
-  depends_on = [terraform_data.amd64_image]
+  depends_on = [terraform_data.amd64_image, terraform_data.image_selector]
 }
 
 data "hcloud_image" "arm64" {
@@ -324,5 +334,5 @@ data "hcloud_image" "arm64" {
   with_architecture = "arm"
   most_recent       = true
 
-  depends_on = [terraform_data.arm64_image]
+  depends_on = [terraform_data.arm64_image, terraform_data.image_selector]
 }
